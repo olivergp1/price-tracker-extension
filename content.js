@@ -1,21 +1,26 @@
 console.log("Content script loaded...");
 
-// Load Firebase libraries from the local `firebase` folder
 try {
+  // Log and load Firebase libraries from the local `firebase` folder
+  console.log("Testing chrome.runtime.getURL in content.js context...");
+  console.log("App script URL:", chrome.runtime.getURL("firebase/firebase-app.js"));
+  console.log("Firestore script URL:", chrome.runtime.getURL("firebase/firebase-firestore.js"));
+
   const scriptApp = document.createElement("script");
   scriptApp.src = chrome.runtime.getURL("firebase/firebase-app.js");
   document.head.appendChild(scriptApp);
-  console.log("App script URL:", scriptApp.src);
+  console.log("App script injected successfully:", scriptApp.src);
 
   const scriptFirestore = document.createElement("script");
   scriptFirestore.src = chrome.runtime.getURL("firebase/firebase-firestore.js");
   document.head.appendChild(scriptFirestore);
-  console.log("Firestore script URL:", scriptFirestore.src);
+  console.log("Firestore script injected successfully:", scriptFirestore.src);
 
+  // Wait for the Firestore script to load before initializing Firebase
   scriptFirestore.onload = function () {
     console.log("Firebase libraries loaded...");
 
-    // Initialize Firebase after libraries are loaded
+    // Initialize Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
       authDomain: "car-price-tracker.firebaseapp.com",
@@ -68,9 +73,10 @@ try {
     });
   };
 } catch (error) {
-  console.error("Error loading Firebase scripts:", error);
+  console.error("Error loading Firebase scripts or initializing Firebase:", error);
 }
 
+// Helper function to hash string
 function hashCode(str) {
   return str.split("").reduce((a, b) => {
     a = (a << 5) - a + b.charCodeAt(0);
