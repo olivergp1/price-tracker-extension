@@ -3,16 +3,16 @@ console.log("Content script loaded...");
 try {
   // Load Firebase libraries from the local `firebase` folder
   console.log("Testing chrome.runtime.getURL in content.js context...");
-  console.log("App script URL:", chrome.runtime.getURL("firebase/firebase-app.js"));
-  console.log("Firestore script URL:", chrome.runtime.getURL("firebase/firebase-firestore.js"));
+  console.log("App script URL:", chrome.runtime.getURL("firebase/firebase-app-compat.js"));
+  console.log("Firestore script URL:", chrome.runtime.getURL("firebase/firebase-firestore-compat.js"));
 
   const scriptApp = document.createElement("script");
-  scriptApp.src = chrome.runtime.getURL("firebase/firebase-app.js");
+  scriptApp.src = chrome.runtime.getURL("firebase/firebase-app-compat.js");
   document.head.appendChild(scriptApp);
   console.log("App script injected successfully:", scriptApp.src);
 
   const scriptFirestore = document.createElement("script");
-  scriptFirestore.src = chrome.runtime.getURL("firebase/firebase-firestore.js");
+  scriptFirestore.src = chrome.runtime.getURL("firebase/firebase-firestore-compat.js");
   document.head.appendChild(scriptFirestore);
   console.log("Firestore script injected successfully:", scriptFirestore.src);
 
