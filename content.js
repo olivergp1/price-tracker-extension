@@ -1,57 +1,44 @@
-import { db } from "./firebase-config.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+// Firebase configuration (make sure firebase-config.js is correctly set up and loaded)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-// Function to fetch price tracker data from Firebase
-async function fetchPriceData(advertId) {
-  try {
-    const docRef = doc(db, "adverts", advertId);
-    const docSnap = await getDoc(docRef);
+// Firebase initialization
+const firebaseConfig = {
+  apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
+  authDomain: "car-price-tracker.firebaseapp.com",
+  projectId: "car-price-tracker",
+  storageBucket: "car-price-tracker.appspot.com",
+  messagingSenderId: "476121813597",
+  appId: "1:476121813597:web:3ebd9493b1c29ffbb8b3b4"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    if (docSnap.exists()) {
-      return docSnap.data();
-    } else {
-      console.log(`No data found for advert: ${advertId}`);
-      return null;
-    }
-  } catch (error) {
-    console.error("Error fetching data from Firestore:", error);
-    return null;
+// Inject price tracker data into advert containers
+document.querySelectorAll("article.relative.flex").forEach(async (container) => {
+  const link = container.querySelector("a[href]").href;
+  const id = link.replace(/\//g, "_") + "_" + String(hashCode(link));
+
+  const docRef = doc(db, "adverts", id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    const trackerInfo = document.createElement("div");
+    trackerInfo.innerHTML = `
+      <p><strong>Advertised:</strong> ${data.advertised_date}</p>
+      ${data.price_history.map(
+        (history) =>
+          `<p>${history.date}: £${history.price}</p>`
+      ).join("")}
+    `;
+    container.appendChild(trackerInfo);
   }
+});
+
+function hashCode(str) {
+  return str.split("").reduce((a, b) => {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
 }
-
-// Function to inject price tracker info into advert containers
-async function injectPriceTracker() {
-  const advertContainers = document.querySelectorAll("article.relative.flex");
-
-  for (const container of advertContainers) {
-    // Get the advert link (unique identifier)
-    const linkTag = container.querySelector("a[href*='/car/']");
-    if (!linkTag) continue;
-
-    const advertId = linkTag.href.replaceAll("/", "_"); // Sanitize link for Firestore ID
-    const priceData = await fetchPriceData(advertId);
-
-    if (priceData) {
-      const priceHistory = priceData.price_history
-        .map(
-          (entry) =>
-            `<div>${entry.date}: <strong>${entry.price}</strong></div>`
-        )
-        .join("");
-
-      // Inject the price history into the container
-      const trackerDiv = document.createElement("div");
-      trackerDiv.innerHTML = `
-        <div style="border: 1px solid #ccc; padding: 8px; margin-top: 8px; font-size: 12px;">
-          <strong>Price History:</strong>
-          ${priceHistory}
-        </div>
-      `;
-
-      container.appendChild(trackerDiv);
-    }
-  }
-}
-
-// Run the script when the page loads
-window.addEventListener("load", injectPriceTracker);

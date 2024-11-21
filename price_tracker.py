@@ -6,7 +6,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # Initialize Firebase
-cred = credentials.Certificate("firebase_credentials.json")  # Ensure this file is in your project folder
+cred = credentials.Certificate("firebase_credentials.json")
 firebase_admin.initialize_app(cred)
 
 # Connect to Firestore
@@ -19,22 +19,18 @@ BASE_URL = "https://www.carandclassic.com/search?listing_type_ex=advert&page={}&
 MAX_PAGES = 250
 
 def fetch_adverts(url):
-    # Set headers to mimic a real browser
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
     }
 
-    # Fetch the page with headers
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         print(f"Failed to fetch page: {url} (Status code: {response.status_code})")
         return None, False, False
 
-    # Parse the HTML
     soup = BeautifulSoup(response.text, 'html.parser')
     page_text = soup.get_text().lower()
 
-    # Check for stop conditions
     if "0 listings" in page_text:
         print(f"No more listings found at {url}. Stopping.")
         return None, True, False
@@ -42,7 +38,6 @@ def fetch_adverts(url):
         print(f"Website error detected at {url}. Stopping.")
         return None, True, True
 
-    # Find advert containers
     advert_containers = soup.find_all("article", class_="relative flex")
     print(f"Found {len(advert_containers)} advert containers on page {url}.")
 
@@ -68,13 +63,9 @@ def fetch_adverts(url):
 def save_to_firestore(adverts):
     for advert in adverts:
         try:
-            # Log the document ID being saved
             print(f"Attempting to save document: {advert['id']} ({advert['link']})")
-            
-            # Use the sanitized advert ID
             doc_ref = db.collection("adverts").document(advert['id'])
 
-            # Save or update the document
             doc_ref.set({
                 "link": advert["link"],
                 "title": advert["title"],
@@ -104,7 +95,7 @@ def process_pages():
 
         if adverts:
             print(f"Fetched {len(adverts)} adverts from page {page_number}. Sending to Firestore...")
-            save_to_firestore(adverts)  # Save fetched adverts to Firestore
+            save_to_firestore(adverts)
         else:
             print(f"No adverts found on page {page_number}.")
 
