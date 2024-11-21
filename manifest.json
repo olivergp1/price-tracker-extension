@@ -3,15 +3,21 @@
   "name": "Car Price Tracker",
   "version": "1.0",
   "description": "Tracks and displays price changes for car adverts on carandclassic.com.",
-  "permissions": ["activeTab"],
+  "permissions": [
+    "activeTab"
+  ],
   "host_permissions": [
     "https://www.carandclassic.com/*",
     "https://firestore.googleapis.com/*"
   ],
+  "background": {
+    "service_worker": "firebase-config.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://www.carandclassic.com/*"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "type": "module"
     }
   ]
 }
