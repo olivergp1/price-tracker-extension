@@ -14,18 +14,5 @@
       "matches": ["https://www.carandclassic.com/*"],
       "js": ["content.js"]
     }
-  ],
-  "web_accessible_resources": [
-  {
-    "resources": [
-      "firebase/firebase-app-compat.js",
-      "firebase/firebase-firestore-compat.js",
-      "firebase/firebase-init-expose.js"
-    ],
-    "matches": ["https://www.carandclassic.com/*"]
-  }
-],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+  ]
 }
