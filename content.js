@@ -16,23 +16,38 @@ const db = getFirestore(app);
 
 // Inject price tracker data into advert containers
 document.querySelectorAll("article.relative.flex").forEach(async (container) => {
-  const link = container.querySelector("a[href]").href;
+  const linkElement = container.querySelector("a[href]");
+  if (!linkElement) return;
+
+  const link = linkElement.href;
   const id = link.replace(/\//g, "_") + "_" + String(hashCode(link));
 
-  const docRef = doc(db, "adverts", id);
-  const docSnap = await getDoc(docRef);
+  console.log(`Fetching data for advert ID: ${id}`);
 
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    const trackerInfo = document.createElement("div");
-    trackerInfo.innerHTML = `
-      <p><strong>Advertised:</strong> ${data.advertised_date}</p>
-      ${data.price_history.map(
-        (history) =>
-          `<p>${history.date}: £${history.price}</p>`
-      ).join("")}
-    `;
-    container.appendChild(trackerInfo);
+  try {
+    const docRef = doc(db, "adverts", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      console.log(`Found data for advert ID: ${id}`, data);
+
+      const trackerInfo = document.createElement("div");
+      trackerInfo.innerHTML = `
+        <p><strong>Advertised:</strong> ${data.advertised_date}</p>
+        ${data.price_history.map(
+          (history) =>
+            `<p>${history.date}: ${history.price}</p>`
+        ).join("")}
+      `;
+      trackerInfo.style.marginTop = "10px";
+      trackerInfo.style.color = "black";
+      container.appendChild(trackerInfo);
+    } else {
+      console.log(`No data found for advert ID: ${id}`);
+    }
+  } catch (error) {
+    console.error(`Error fetching data for advert ID: ${id}`, error);
   }
 });
 

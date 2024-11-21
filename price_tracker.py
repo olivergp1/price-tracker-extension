@@ -62,15 +62,26 @@ def fetch_adverts(url):
         print(f"Website error detected at {url}. Stopping.")
         return None, True, True
 
+    # Find all advert containers
     advert_containers = soup.find_all("article", class_="relative flex")
     print(f"Found {len(advert_containers)} advert containers on page {url}.")
+
+    if not advert_containers:
+        print(f"No advert containers detected on page {url}. Check HTML structure or filters.")
+        print(response.text[:1000])  # Log the first 1000 characters of the page for debugging
+        return None, True, False
 
     adverts = []
     for advert in advert_containers:
         try:
             link_tag = advert.find("a", href=True)
-            if "/car/" not in link_tag['href']:
+            if not link_tag:
                 continue
+
+            # Include adverts with /car/ or /l/ in their URLs
+            if "/car/" not in link_tag['href'] and "/l/" not in link_tag['href']:
+                continue
+
             title = advert.find("h2").get_text(strip=True)
             price = advert.find("h3", class_="text-base font-bold normal-case tracking-normal").get_text(strip=True)
             link = link_tag['href']
