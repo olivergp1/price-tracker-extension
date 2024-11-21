@@ -17,65 +17,80 @@ try {
   document.head.appendChild(scriptFirestore);
   console.log("Firestore script injected successfully:", scriptFirestore.src);
 
-  // Wait for the Firestore script to load before initializing Firebase
+  // Wait for the Firestore script to load before exposing and initializing Firebase
   scriptFirestore.onload = function () {
     console.log("Firebase libraries loaded...");
 
-    try {
-      // Initialize Firebase directly in this script
-      const firebaseConfig = {
-        apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
-        authDomain: "car-price-tracker.firebaseapp.com",
-        projectId: "car-price-tracker",
-        storageBucket: "car-price-tracker.appspot.com",
-        messagingSenderId: "476121813597",
-        appId: "1:476121813597:web:3ebd9493b1c29ffbb8b3b4",
-      };
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-      console.log("Firebase initialized successfully.");
+    // Inject another script to expose the firebase object globally
+    const exposeScript = document.createElement("script");
+    exposeScript.textContent = `
+      try {
+        window.firebase = firebase; // Expose Firebase globally
+        console.log("Firebase object exposed globally.");
+      } catch (error) {
+        console.error("Error exposing Firebase globally:", error);
+      }
+    `;
+    document.head.appendChild(exposeScript);
 
-      // Inject price tracker data into advert containers
-      document.querySelectorAll("article.relative.flex").forEach(async (container) => {
-        const linkElement = container.querySelector("a[href]");
-        if (!linkElement) {
-          console.log("No link element found in advert container...");
-          return;
-        }
+    // Wait for Firebase to be exposed before initializing
+    exposeScript.onload = function () {
+      try {
+        // Initialize Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
+          authDomain: "car-price-tracker.firebaseapp.com",
+          projectId: "car-price-tracker",
+          storageBucket: "car-price-tracker.appspot.com",
+          messagingSenderId: "476121813597",
+          appId: "1:476121813597:web:3ebd9493b1c29ffbb8b3b4",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        console.log("Firebase initialized successfully.");
 
-        const link = linkElement.href;
-        const id = link.replace(/\//g, "_") + "_" + String(hashCode(link));
-
-        console.log(`Fetching data for advert ID: ${id}`);
-
-        try {
-          const docRef = db.collection("adverts").doc(id);
-          const docSnap = await docRef.get();
-
-          if (docSnap.exists) {
-            const data = docSnap.data();
-            console.log(`Found data for advert ID: ${id}`, data);
-
-            const trackerInfo = document.createElement("div");
-            trackerInfo.innerHTML = `
-              <p><strong>Advertised:</strong> ${data.advertised_date}</p>
-              ${data.price_history
-                .map((history) => `<p>${history.date}: ${history.price}</p>`)
-                .join("")}
-            `;
-            trackerInfo.style.marginTop = "10px";
-            trackerInfo.style.color = "black";
-            container.appendChild(trackerInfo);
-          } else {
-            console.log(`No data found for advert ID: ${id}`);
+        // Inject price tracker data into advert containers
+        document.querySelectorAll("article.relative.flex").forEach(async (container) => {
+          const linkElement = container.querySelector("a[href]");
+          if (!linkElement) {
+            console.log("No link element found in advert container...");
+            return;
           }
-        } catch (error) {
-          console.error(`Error fetching data for advert ID: ${id}`, error);
-        }
-      });
-    } catch (error) {
-      console.error("Error initializing Firebase:", error);
-    }
+
+          const link = linkElement.href;
+          const id = link.replace(/\//g, "_") + "_" + String(hashCode(link));
+
+          console.log(`Fetching data for advert ID: ${id}`);
+
+          try {
+            const docRef = db.collection("adverts").doc(id);
+            const docSnap = await docRef.get();
+
+            if (docSnap.exists) {
+              const data = docSnap.data();
+              console.log(`Found data for advert ID: ${id}`, data);
+
+              const trackerInfo = document.createElement("div");
+              trackerInfo.innerHTML = `
+                <p><strong>Advertised:</strong> ${data.advertised_date}</p>
+                ${data.price_history
+                  .map((history) => `<p>${history.date}: ${history.price}</p>`)
+                  .join("")}
+              `;
+              trackerInfo.style.marginTop = "10px";
+              trackerInfo.style.color = "black";
+              container.appendChild(trackerInfo);
+            } else {
+              console.log(`No data found for advert ID: ${id}`);
+            }
+          } catch (error) {
+            console.error(`Error fetching data for advert ID: ${id}`, error);
+          }
+        });
+      } catch (error) {
+        console.error("Error initializing Firebase:", error);
+      }
+    };
   };
 } catch (error) {
   console.error("Error loading Firebase scripts or initializing Firebase:", error);
