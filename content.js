@@ -1,8 +1,8 @@
-// Firebase configuration
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+// Import Firebase from local files
+import { initializeApp } from "./firebase/firebase-app.js";
+import { getFirestore, doc, getDoc } from "./firebase/firebase-firestore.js";
 
-// Firebase initialization
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
   authDomain: "car-price-tracker.firebaseapp.com",
