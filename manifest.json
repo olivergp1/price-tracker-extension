@@ -19,7 +19,8 @@
     {
       "resources": [
         "firebase/firebase-app-compat.js",
-        "firebase/firebase-firestore-compat.js"
+        "firebase/firebase-firestore-compat.js",
+        "firebase-init.js"
       ],
       "matches": ["https://www.carandclassic.com/*"]
     }
