@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { initializeApp } from "./firebase/firebase-app.js";
+import { getFirestore, doc, getDoc } from "./firebase/firebase-firestore.js";
 
 console.log("Content script loaded...");
 
@@ -19,52 +19,30 @@ try {
   const db = getFirestore(app);
   console.log("Firebase initialized successfully.");
 
-  // Inject price tracker data into advert containers
-  document.querySelectorAll("article.relative.flex").forEach(async (container) => {
-    const linkElement = container.querySelector("a[href]");
-    if (!linkElement) {
-      console.log("No link element found in advert container...");
-      return;
+  // Example function to fetch Firestore data
+  async function fetchAdvertData(advertId) {
+    const docRef = doc(db, "adverts", advertId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      console.log(`Advert ${advertId} data:`, docSnap.data());
+    } else {
+      console.log(`No data found for advert ID: ${advertId}`);
     }
+  }
 
-    const link = linkElement.href;
-    const id = link.replace(/\//g, "_") + "_" + String(hashCode(link));
+  // Automatically detect advert IDs and fetch their data
+  const advertContainers = document.querySelectorAll("[data-advert-id]");
 
-    console.log(`Fetching data for advert ID: ${id}`);
-
-    try {
-      const docRef = doc(db, "adverts", id);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        console.log(`Found data for advert ID: ${id}`, data);
-
-        const trackerInfo = document.createElement("div");
-        trackerInfo.innerHTML = `
-          <p><strong>Advertised:</strong> ${data.advertised_date}</p>
-          ${data.price_history
-            .map((history) => `<p>${history.date}: ${history.price}</p>`)
-            .join("")}
-        `;
-        trackerInfo.style.marginTop = "10px";
-        trackerInfo.style.color = "black";
-        container.appendChild(trackerInfo);
-      } else {
-        console.log(`No data found for advert ID: ${id}`);
-      }
-    } catch (error) {
-      console.error(`Error fetching data for advert ID: ${id}`, error);
-    }
+  advertContainers.forEach((container) => {
+    const advertId = container.getAttribute("data-advert-id");
+    console.log(`Fetching data for advert ID: ${advertId}`);
+    fetchAdvertData(advertId)
+      .then((data) => console.log(`Data fetched successfully for ${advertId}`))
+      .catch((error) =>
+        console.error(`Error fetching data for advert ID: ${advertId}`, error)
+      );
   });
 } catch (error) {
   console.error("Error initializing Firebase or interacting with Firestore:", error);
-}
-
-// Helper function to hash string
-function hashCode(str) {
-  return str.split("").reduce((a, b) => {
-    a = (a << 5) - a + b.charCodeAt(0);
-    return a & a;
-  }, 0);
 }
