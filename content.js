@@ -1,4 +1,4 @@
-// Firebase configuration (make sure firebase-config.js is correctly set up and loaded)
+// Firebase configuration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
