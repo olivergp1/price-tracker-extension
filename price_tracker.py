@@ -78,8 +78,8 @@ def fetch_adverts(url):
             if not link_tag:
                 continue
 
-            # Include adverts with /car/ or /l/ in their URLs
-            if "/car/" not in link_tag['href'] and "/l/" not in link_tag['href']:
+            # Exclude adverts with "/auctions/" or "/make-an-offer/" in their URLs
+            if "/auctions/" in link_tag['href'] or "/make-an-offer/" in link_tag['href']:
                 continue
 
             title = advert.find("h2").get_text(strip=True)
@@ -97,6 +97,7 @@ def fetch_adverts(url):
 
     print(f"Extracted {len(adverts)} adverts from page {url}.")
     return adverts, False, False
+
 
 def save_to_firestore(adverts):
     for advert in adverts:
