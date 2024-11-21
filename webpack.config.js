@@ -1,27 +1,30 @@
 const path = require("path");
 
 module.exports = {
-  mode: "development", // Change to "production" for production builds
-  entry: "./content.js", // Entry point for the bundling process
+  mode: "production", // Ensure production mode is set
+  entry: "./content.js", // Entry point for the extension
   output: {
-    filename: "bundle.js", // Name of the bundled file
-    path: path.resolve(__dirname, "dist"), // Output folder: "dist"
-  },
-  resolve: {
-    extensions: [".js"], // File extensions Webpack will process
+    path: path.resolve(__dirname, "dist"),
+    filename: "bundle.js",
   },
   module: {
     rules: [
       {
-        test: /\.js$/, // Apply this rule to `.js` files
-        exclude: /node_modules/, // Exclude dependencies in `node_modules`
+        test: /\.js$/,
+        exclude: /node_modules/,
         use: {
-          loader: "babel-loader", // Transpile JavaScript files
+          loader: "babel-loader",
           options: {
-            presets: ["@babel/preset-env"], // Use modern JavaScript features
+            presets: ["@babel/preset-env"],
           },
         },
       },
     ],
   },
+  resolve: {
+    fallback: {
+      fs: false,
+    },
+  },
+  devtool: false, // Remove source maps to avoid eval() usage
 };
