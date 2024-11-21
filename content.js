@@ -17,35 +17,18 @@ try {
   document.head.appendChild(scriptFirestore);
   console.log("Firestore script injected successfully:", scriptFirestore.src);
 
-  // Wait for the Firestore script to load before exposing and initializing Firebase
+  // Wait for the Firestore script to load before injecting the initialization file
   scriptFirestore.onload = function () {
     console.log("Firebase libraries loaded...");
 
-    // Inject another script to expose the firebase object globally
-    const exposeScript = document.createElement("script");
-    exposeScript.textContent = `
-      try {
-        window.firebase = firebase; // Expose Firebase globally
-        console.log("Firebase object exposed globally.");
-      } catch (error) {
-        console.error("Error exposing Firebase globally:", error);
-      }
-    `;
-    document.head.appendChild(exposeScript);
+    const initExposeScript = document.createElement("script");
+    initExposeScript.src = chrome.runtime.getURL("firebase/firebase-init-expose.js");
+    document.head.appendChild(initExposeScript);
+    console.log("Firebase initialization and expose script injected successfully:", initExposeScript.src);
 
-    // Wait for Firebase to be exposed before initializing
-    exposeScript.onload = function () {
+    initExposeScript.onload = function () {
       try {
-        // Initialize Firebase
-        const firebaseConfig = {
-          apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
-          authDomain: "car-price-tracker.firebaseapp.com",
-          projectId: "car-price-tracker",
-          storageBucket: "car-price-tracker.appspot.com",
-          messagingSenderId: "476121813597",
-          appId: "1:476121813597:web:3ebd9493b1c29ffbb8b3b4",
-        };
-        firebase.initializeApp(firebaseConfig);
+        // Wait for Firebase to be ready before interacting with it
         const db = firebase.firestore();
         console.log("Firebase initialized successfully.");
 
@@ -88,7 +71,7 @@ try {
           }
         });
       } catch (error) {
-        console.error("Error initializing Firebase:", error);
+        console.error("Error initializing Firebase or interacting with Firestore:", error);
       }
     };
   };
