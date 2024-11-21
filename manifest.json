@@ -14,5 +14,17 @@
       "matches": ["https://www.carandclassic.com/*"],
       "js": ["bundle.js"]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "firebase/firebase-app.js",
+        "firebase/firebase-firestore.js",
+        "firebase/firebase-app-compat.js",
+        "firebase/firebase-firestore-compat.js",
+        "firebase-init-expose.js"
+      ],
+      "matches": ["https://www.carandclassic.com/*"]
+    }
   ]
 }
