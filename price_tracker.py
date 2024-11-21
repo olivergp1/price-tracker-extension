@@ -4,6 +4,8 @@ import time
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
+import json
 
 # Debug Log: Starting the Script
 print("Starting the script...")
@@ -11,7 +13,16 @@ print("Starting the script...")
 # Initialize Firebase
 try:
     print("Initializing Firebase...")
-    cred = credentials.Certificate("firebase_credentials.json")
+
+    # Check if running on Render by checking the environment variable
+    if os.getenv("FIREBASE_CREDENTIALS"):
+        print("Using Firebase credentials from environment variable.")
+        firebase_credentials = json.loads(os.getenv("FIREBASE_CREDENTIALS"))
+        cred = credentials.Certificate(firebase_credentials)
+    else:
+        print("Using Firebase credentials from local file (firebase_credentials.json).")
+        cred = credentials.Certificate("firebase_credentials.json")
+
     firebase_admin.initialize_app(cred)
     db = firestore.client()
     print("Firebase initialized successfully!")
