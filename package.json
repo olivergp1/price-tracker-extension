@@ -1,0 +1,17 @@
+{
+  "name": "price-tracker-extension",
+  "version": "1.0.0",
+  "description": "A Chrome extension to track car advert prices on carandclassic.com.",
+  "main": "content.js",
+  "scripts": {
+    "build": "esbuild content.js --bundle --outfile=bundle.js"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^9.17.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.2"
+  }
+}
