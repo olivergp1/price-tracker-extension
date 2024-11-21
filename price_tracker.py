@@ -6,11 +6,15 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # Initialize Firebase
-cred = credentials.Certificate("firebase_credentials.json")
-firebase_admin.initialize_app(cred)
-
-# Connect to Firestore
-db = firestore.client()
+print("Initializing Firebase...")
+try:
+    cred = credentials.Certificate("firebase_credentials.json")
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    print("Firebase initialized successfully!")
+except Exception as e:
+    print(f"Error initializing Firebase: {e}")
+    exit(1)
 
 # Base URL for scraping
 BASE_URL = "https://www.carandclassic.com/search?listing_type_ex=advert&page={}&sort=latest&source=modal-sort"
@@ -19,14 +23,19 @@ BASE_URL = "https://www.carandclassic.com/search?listing_type_ex=advert&page={}&
 MAX_PAGES = 250
 
 def fetch_adverts(url):
+    print(f"Fetching adverts from URL: {url}")
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
     }
 
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to fetch page: {url} (Status code: {response.status_code})")
-        return None, False, False
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            print(f"Failed to fetch page: {url} (Status code: {response.status_code})")
+            return None, False, False
+    except Exception as e:
+        print(f"Error fetching URL {url}: {e}")
+        return None, False, True
 
     soup = BeautifulSoup(response.text, 'html.parser')
     page_text = soup.get_text().lower()
@@ -43,19 +52,22 @@ def fetch_adverts(url):
 
     adverts = []
     for advert in advert_containers:
-        link_tag = advert.find("a", href=True)
-        if "/car/" not in link_tag['href']:
-            continue
-        title = advert.find("h2").get_text(strip=True)
-        price = advert.find("h3", class_="text-base font-bold normal-case tracking-normal").get_text(strip=True)
-        link = link_tag['href']
-        id = link.replace("/", "_") + "_" + str(hash(link))
-        adverts.append({
-            "link": link,
-            "id": id,
-            "title": title,
-            "current_price": price
-        })
+        try:
+            link_tag = advert.find("a", href=True)
+            if "/car/" not in link_tag['href']:
+                continue
+            title = advert.find("h2").get_text(strip=True)
+            price = advert.find("h3", class_="text-base font-bold normal-case tracking-normal").get_text(strip=True)
+            link = link_tag['href']
+            id = link.replace("/", "_") + "_" + str(hash(link))
+            adverts.append({
+                "link": link,
+                "id": id,
+                "title": title,
+                "current_price": price
+            })
+        except Exception as e:
+            print(f"Error parsing advert container: {e}")
 
     print(f"Extracted {len(adverts)} adverts from page {url}.")
     return adverts, False, False
@@ -79,11 +91,11 @@ def save_to_firestore(adverts):
                 ]
             })
             print(f"Successfully saved document: {advert['id']}")
-
         except Exception as e:
             print(f"Error saving document {advert['id']} ({advert['link']}): {e}")
 
 def process_pages():
+    print("Starting to process pages...")
     page_number = 1
     stop = False
     error_detected = False
@@ -112,4 +124,8 @@ def process_pages():
         print("Finished processing all pages.")
 
 if __name__ == "__main__":
-    process_pages()
+    print("Script started...")
+    try:
+        process_pages()
+    except Exception as e:
+        print(f"Unexpected error occurred: {e}")
