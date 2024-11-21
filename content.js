@@ -17,30 +17,14 @@ try {
   document.head.appendChild(scriptFirestore);
   console.log("Firestore script injected successfully:", scriptFirestore.src);
 
-  // Wait for the Firestore script to load before initializing Firebase
+  // Inject Firebase initialization script after the libraries are loaded
   scriptFirestore.onload = function () {
     console.log("Firebase libraries loaded...");
 
-    // Inject a new script to initialize Firebase in the global context
     const initScript = document.createElement("script");
-    initScript.textContent = `
-      try {
-        const firebaseConfig = {
-          apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
-          authDomain: "car-price-tracker.firebaseapp.com",
-          projectId: "car-price-tracker",
-          storageBucket: "car-price-tracker.appspot.com",
-          messagingSenderId: "476121813597",
-          appId: "1:476121813597:web:3ebd9493b1c29ffbb8b3b4"
-        };
-        firebase.initializeApp(firebaseConfig);
-        window.firebase = firebase; // Expose firebase globally for content.js
-        console.log("Firebase initialized in the global context.");
-      } catch (error) {
-        console.error("Error initializing Firebase in the global context:", error);
-      }
-    `;
+    initScript.src = chrome.runtime.getURL("firebase-init.js");
     document.head.appendChild(initScript);
+    console.log("Firebase initialization script injected successfully:", initScript.src);
   };
 
   // Wait for Firebase to be ready before interacting with it
