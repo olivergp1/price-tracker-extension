@@ -17,11 +17,14 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["firebase/firebase-app.js", "firebase/firebase-firestore.js"],
+      "resources": [
+        "firebase/firebase-app.js",
+        "firebase/firebase-firestore.js"
+      ],
       "matches": ["https://www.carandclassic.com/*"]
     }
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }
