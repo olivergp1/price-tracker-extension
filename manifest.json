@@ -3,12 +3,8 @@
   "name": "Car Price Tracker",
   "version": "1.0",
   "description": "Tracks and displays price changes for car adverts on carandclassic.com.",
-  "permissions": [
-    "activeTab"
-  ],
-  "host_permissions": [
-    "https://www.carandclassic.com/*"
-  ],
+  "permissions": ["activeTab"],
+  "host_permissions": ["https://www.carandclassic.com/*"],
   "content_scripts": [
     {
       "matches": ["https://www.carandclassic.com/*"],
