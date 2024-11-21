@@ -10,14 +10,14 @@
     "https://www.carandclassic.com/*",
     "https://firestore.googleapis.com/*"
   ],
-  "background": {
-    "service_worker": "firebase-config.js"
-  },
   "content_scripts": [
     {
       "matches": ["https://www.carandclassic.com/*"],
       "js": ["content.js"],
       "type": "module"
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://www.gstatic.com; object-src 'self'"
+  }
 }
