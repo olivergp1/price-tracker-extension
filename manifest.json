@@ -18,8 +18,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "firebase/firebase-app.js",
-        "firebase/firebase-firestore.js"
+        "firebase/firebase-app-compat.js",
+        "firebase/firebase-firestore-compat.js"
       ],
       "matches": ["https://www.carandclassic.com/*"]
     }
