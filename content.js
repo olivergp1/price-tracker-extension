@@ -1,4 +1,6 @@
-// Load Firebase libraries from the local firebase folder
+console.log("Content script loaded...");
+
+// Load Firebase libraries from the local `firebase` folder
 const scriptApp = document.createElement("script");
 scriptApp.src = chrome.runtime.getURL("firebase/firebase-app.js");
 document.head.appendChild(scriptApp);
@@ -8,6 +10,8 @@ scriptFirestore.src = chrome.runtime.getURL("firebase/firebase-firestore.js");
 document.head.appendChild(scriptFirestore);
 
 scriptFirestore.onload = function () {
+  console.log("Firebase libraries loaded...");
+
   // Initialize Firebase after libraries are loaded
   const firebaseConfig = {
     apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
@@ -19,11 +23,15 @@ scriptFirestore.onload = function () {
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  console.log("Firebase initialized...");
 
   // Inject price tracker data into advert containers
   document.querySelectorAll("article.relative.flex").forEach(async (container) => {
     const linkElement = container.querySelector("a[href]");
-    if (!linkElement) return;
+    if (!linkElement) {
+      console.log("No link element found in advert container...");
+      return;
+    }
 
     const link = linkElement.href;
     const id = link.replace(/\//g, "_") + "_" + String(hashCode(link));
@@ -55,11 +63,11 @@ scriptFirestore.onload = function () {
       console.error(`Error fetching data for advert ID: ${id}`, error);
     }
   });
-
-  function hashCode(str) {
-    return str.split("").reduce((a, b) => {
-      a = (a << 5) - a + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-  }
 };
+
+function hashCode(str) {
+  return str.split("").reduce((a, b) => {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+}
