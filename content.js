@@ -1,30 +1,46 @@
-import { initializeApp } from "./firebase/firebase-app.js";
-import { getFirestore, doc, getDoc } from "./firebase/firebase-firestore.js";
-
 console.log("Content script loaded...");
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
-  authDomain: "car-price-tracker.firebaseapp.com",
-  projectId: "car-price-tracker",
-  storageBucket: "car-price-tracker.appspot.com",
-  messagingSenderId: "476121813597",
-  appId: "1:476121813597:web:3ebd9493b1c29ffbb8b3b4",
-};
+// Firebase SDK script URLs
+const firebaseAppScript = "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+const firebaseFirestoreScript = "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-try {
+// Load Firebase scripts dynamically
+function loadScript(url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = url;
+    script.type = "text/javascript";
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function initializeFirebase() {
+  console.log("Loading Firebase SDK...");
+  await loadScript(firebaseAppScript);
+  await loadScript(firebaseFirestoreScript);
+
   console.log("Initializing Firebase...");
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyAqZ52FUkyVPQM331l9MZhtuV_7Y3yNs88",
+    authDomain: "car-price-tracker.firebaseapp.com",
+    projectId: "car-price-tracker",
+    storageBucket: "car-price-tracker.appspot.com",
+    messagingSenderId: "476121813597",
+    appId: "1:476121813597:web:3ebd9493b1c29ffbb8b3b4",
+  };
+
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore(app);
   console.log("Firebase initialized successfully.");
 
-  // Example function to fetch Firestore data
+  // Example: Fetch advert data from Firestore
   async function fetchAdvertData(advertId) {
-    const docRef = doc(db, "adverts", advertId);
-    const docSnap = await getDoc(docRef);
+    const docRef = db.collection("adverts").doc(advertId);
+    const docSnap = await docRef.get();
 
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       console.log(`Advert ${advertId} data:`, docSnap.data());
     } else {
       console.log(`No data found for advert ID: ${advertId}`);
@@ -33,16 +49,15 @@ try {
 
   // Automatically detect advert IDs and fetch their data
   const advertContainers = document.querySelectorAll("[data-advert-id]");
-
   advertContainers.forEach((container) => {
     const advertId = container.getAttribute("data-advert-id");
     console.log(`Fetching data for advert ID: ${advertId}`);
-    fetchAdvertData(advertId)
-      .then((data) => console.log(`Data fetched successfully for ${advertId}`))
-      .catch((error) =>
-        console.error(`Error fetching data for advert ID: ${advertId}`, error)
-      );
+    fetchAdvertData(advertId).catch((error) =>
+      console.error(`Error fetching data for advert ID: ${advertId}`, error)
+    );
   });
-} catch (error) {
-  console.error("Error initializing Firebase or interacting with Firestore:", error);
 }
+
+initializeFirebase().catch((error) => {
+  console.error("Error initializing Firebase or interacting with Firestore:", error);
+});
