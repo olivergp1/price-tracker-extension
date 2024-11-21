@@ -22,7 +22,7 @@
       "firebase/firebase-firestore-compat.js",
       "firebase/firebase-init.js"
     ],
-    "matches": ["https://www.carandclassic.com/*"]
+    "matches": ["<all_urls>"]
   }
 ],
   "content_security_policy": {
