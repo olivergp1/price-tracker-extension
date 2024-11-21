@@ -5,15 +5,18 @@ from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+# Debug Log: Starting the Script
+print("Starting the script...")
+
 # Initialize Firebase
-print("Initializing Firebase...")
 try:
+    print("Initializing Firebase...")
     cred = credentials.Certificate("firebase_credentials.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
     print("Firebase initialized successfully!")
 except Exception as e:
-    print(f"Error initializing Firebase: {e}")
+    print(f"Error during Firebase initialization: {e}")
     exit(1)
 
 # Base URL for scraping
@@ -29,7 +32,8 @@ def fetch_adverts(url):
     }
 
     try:
-        response = requests.get(url, headers=headers)
+        # Add a 10-second timeout to prevent hanging
+        response = requests.get(url, headers=headers, timeout=10)
         if response.status_code != 200:
             print(f"Failed to fetch page: {url} (Status code: {response.status_code})")
             return None, False, False
@@ -78,6 +82,7 @@ def save_to_firestore(adverts):
             print(f"Attempting to save document: {advert['id']} ({advert['link']})")
             doc_ref = db.collection("adverts").document(advert['id'])
 
+            # Add timeout handling for Firestore writes
             doc_ref.set({
                 "link": advert["link"],
                 "title": advert["title"],
